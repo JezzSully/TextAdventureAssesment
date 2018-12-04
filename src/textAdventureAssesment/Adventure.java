@@ -18,6 +18,9 @@ public class Adventure
 	private Scanner scan = new Scanner(System.in);
 	
 	private List<Interest> interests = new ArrayList<Interest>();
+	private List<Tile> tilesVisited = new ArrayList<Tile>();
+	
+	private Tile currentTile;
 	
 	Random r = new Random();
 	
@@ -52,7 +55,10 @@ public class Adventure
 		//Print all cool intro stuff
 		System.out.println("You find yourself in a shack. good luck.");
 		System.out.println("");
+		
 		loadInterestsFromFile();
+		//Something to change here?
+		
 		checkNewSurroundings();
 	}
 	
@@ -94,8 +100,17 @@ public class Adventure
 
 	}
 	
-	public void checkNewSurroundings()
-	{
+	private void checkNewSurroundings()
+	{	
+		//!?!?!?!?!??!?!?!?!
+		
+		Tile newTile = isVisited(tilesVisited, playerXPosition, playerYPosition);
+		if(!tilesVisited.contains(newTile))
+		{
+			tilesVisited.add(newTile);
+		}
+		currentTile = newTile;
+		
 		List<Interest> interestsInMyArea = interests.stream()
 				.filter(i -> i.getxPosition() == playerXPosition)
 				.filter(i -> i.getyPosition() == playerYPosition)
@@ -108,17 +123,36 @@ public class Adventure
 				System.out.println(i.getDescription());
 				interests.remove(i);
 			}
+			//System.wait(2);
 			//TODO add a small system wait when finding Interests
 		}
 		
 		double closest = findNearestInterestDist();
 		
-		System.out.println("Compass reads " + closest);
+		System.out.print("Compass reads ");
+		System.out.printf("%.2f", closest);
+		System.out.println("");
 		
 		awaitDirections();
 	}
 	
-	public void awaitDirections()
+	public Tile isVisited(List<Tile> tiles,int xpos,int ypos)
+	{
+		Tile tile = tiles.stream().filter(myTile -> myTile.getxPos() == xpos)
+			.filter(myTile -> myTile.getyPos() == ypos)
+			.findFirst()
+			.orElse(null);
+		if(tile == null)
+		{
+			return new Tile(xpos,ypos);
+		}
+		else
+		{
+			return tile;
+		}
+	}
+	
+	private void awaitDirections()
 	{
 		System.out.print("> ");
 		
@@ -126,25 +160,37 @@ public class Adventure
 		move(movement);
 	}
 	
-	public void move(String movement)
+	private void look()
+	{
+		System.out.println(currentTile);
+		checkNewSurroundings();
+	}
+	
+	private void move(String movement)
 	{
 		switch(movement.toLowerCase()) 
 		{
-			//TODO accept single letters
-			case "north":
+			case "north": case "n":
 				playerYPosition++;
 				break;
-			case "east":
+			case "east": case "e":
 				playerXPosition++;
 				break;
-			case "south":
+			case "south": case "s":
 				playerYPosition--;
 				break;
-			case "west":
+			case "west": case "w":
 				playerXPosition--;
 				break;
 			case "look":
-				System.out.println("Well it's pretty barren around here.");
+				look();
+				break;
+			case "help":
+				System.out.print("Commands you can use are: ");
+				System.out.println("north, east, south, west, look, help, quit");
+				break;
+			case "quit":
+				System.exit(0);
 			default:
 				System.out.println("Incorrect movement");
 		}
@@ -158,12 +204,16 @@ public class Adventure
 		{
 			int xdis = Math.abs(i.getxPosition() - playerXPosition);
 			int ydis = Math.abs(i.getyPosition() - playerYPosition);
-			double dist = Math.sqrt((xdis * xdis) + (ydis + ydis));
+			double dist = Math.sqrt((xdis * xdis) + (ydis * ydis));
 			
 			if(dist < closest)
 			{
 				closest = dist;
 			}
+		}
+		if(closest == 1000000.0)
+		{
+			closest = 0;
 		}
 		return closest;
 	}

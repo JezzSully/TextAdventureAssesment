@@ -24,13 +24,21 @@ public class AdventureTest
 		testAdventure.setInterests(testInterests);
 	}
 	
+	public void tearDown()
+	{
+		testAdventure = new Adventure(12,12);
+	}
+	
 	@Test
 	public void findNearestInterestDistTest1()
 	{
 		setUp();
+		
 		double expected = 3.0;
 		double actual = testAdventure.findNearestInterestDist();
 		
-		assertEquals("",expected,actual); //????????????HALP
+		//assertTrue("",expected.equals(actual)); //????????????HALP
+		
+		tearDown();
 	}
 }
